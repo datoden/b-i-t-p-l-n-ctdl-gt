@@ -242,3 +242,107 @@ int main() {
     }
     return 0;
 }
+bool search(const string &word, string &meaning) const {
+const TrieNode *node = findNode(word);
+if (!node || !node->isEnd) return false;
+meaning = node->meaning;
+return true;
+}
+bool erase(const string &word) {
+bool deleted = false;
+eraseRec(&root, word, 0, deleted);
+return deleted;
+}
+vector<pair<string, string>> suggest(const string &prefix, size_t limit = 10) const {
+vector<pair<string, string>> result;
+const TrieNode *node = findNode(prefix);
+if (!node || limit == 0) return result;
+string current = prefix;
+collectRec(node, current, result, limit);
+return result;
+}
+vector<pair<string, string>> listAll() const {
+vector<pair<string, string>> result;
+string current;
+28
+listRec(&root, current, result);
+return result;
+}
+bool saveToFile(const string &filename) const {
+ofstream out(filename);
+if (!out) return false;
+string current;
+saveRec(&root, current, out);
+return static_cast<bool>(out);
+}
+int loadFromFile(const string &filename) {
+ifstream in(filename);
+if (!in) return 0;
+string line;
+int count = 0;
+while (getline(in, line)) {
+size_t sep = line.find('|');
+if (sep == string::npos) continue;
+string word = line.substr(0, sep);
+string meaning = line.substr(sep + 1);
+if (meaning.empty() || !normalizeWord(word)) continue;
+insert(word, meaning);
+++count;
+}
+return count;
+}
+};
+void showEntries(const vector<pair<string, string>> &items) {
+if (items.empty()) {
+cout << "Khong co ket qua.\n";
+29
+return;
+}
+for (size_t i = 0; i < items.size(); ++i)
+cout << i + 1 << ". " << items[i].first
+<< " : " << items[i].second << '\n';
+}
+int readChoice() {
+int choice;
+if (!(cin >> choice)) {
+cin.clear();
+cin.ignore(numeric_limits<streamsize>::max(), '\n');
+return -1;
+}
+cin.ignore(numeric_limits<streamsize>::max(), '\n');
+return choice;
+}
+int main() {
+Trie dictionary;
+const string filename = "tu_vung.txt";
+int loaded = dictionary.loadFromFile(filename);
+cout << "=== TU DIEN ANH - VIET VA GOI Y TU ===\n";
+cout << "So ban ghi doc duoc: " << loaded << "\n";
+bool running = true;
+while (running) {
+cout << "\n---------- MENU ----------\n";
+cout << "1. Tra cuu tu\n";
+cout << "2. Them / cap nhat tu\n";
+cout << "3. Xoa tu\n";
+cout << "4. Goi y tu theo tien to\n";
+cout << "5. Liet ke toan bo tu dien\n";
+cout << "6. Luu du lieu\n";
+cout << "0. Luu va thoat\n";
+30
+cout << "Lua chon: ";
+int choice = readChoice();
+string word, meaning;
+switch (choice) {
+case 1: {
+cout << "Nhap tu can tra: ";
+getline(cin, word);
+if (!normalizeWord(word)) {
+cout << "Tu khong hop le. Chi dung chu cai A-Z.\n";
+break;
+}
+if (dictionary.search(word, meaning))
+cout << word << " nghia la: " << meaning << '\n';
+else
+cout << "Khong tim thay tu \"" << word << "\".\n";
+break;
+}
