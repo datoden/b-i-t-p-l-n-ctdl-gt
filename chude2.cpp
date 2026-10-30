@@ -96,3 +96,67 @@ current.pop_back();
 }
 }
 }
+public:
+bool insert(const string &word, const string &meaning) {
+TrieNode *cur = &root;
+for (char ch : word) {
+int idx = ch - 'a';
+if (!cur->child[idx])
+cur->child[idx] = make_unique<TrieNode>();
+cur = cur->child[idx].get();
+}
+bool isNew = !cur->isEnd;
+cur->isEnd = true;
+cur->meaning = meaning;
+return isNew;
+}
+bool search(const string &word, string &meaning) const {
+const TrieNode *node = findNode(word);
+if (!node || !node->isEnd) return false;
+meaning = node->meaning;
+return true;
+}
+bool erase(const string &word) {
+bool deleted = false;
+eraseRec(&root, word, 0, deleted);
+return deleted;
+}
+vector<pair<string, string>> suggest(const string &prefix, size_t limit = 10) const {
+vector<pair<string, string>> result;
+const TrieNode *node = findNode(prefix);
+if (!node || limit == 0) return result;
+string current = prefix;
+collectRec(node, current, result, limit);
+return result;
+}
+vector<pair<string, string>> listAll() const {
+vector<pair<string, string>> result;
+string current;
+28
+listRec(&root, current, result);
+return result;
+}
+bool saveToFile(const string &filename) const {
+ofstream out(filename);
+if (!out) return false;
+string current;
+saveRec(&root, current, out);
+return static_cast<bool>(out);
+}
+int loadFromFile(const string &filename) {
+ifstream in(filename);
+if (!in) return 0;
+string line;
+int count = 0;
+while (getline(in, line)) {
+size_t sep = line.find('|');
+if (sep == string::npos) continue;
+string word = line.substr(0, sep);
+string meaning = line.substr(sep + 1);
+if (meaning.empty() || !normalizeWord(word)) continue;
+insert(word, meaning);
+++count;
+}
+return count;
+}
+};
