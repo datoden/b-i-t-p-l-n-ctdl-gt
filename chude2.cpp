@@ -159,3 +159,121 @@ insert(word, meaning);
 return count;
 }
 };
+void showEntries(const vector<pair<string, string>> &items) {
+if (items.empty()) {
+cout << "Khong co ket qua.\n";
+return;
+}
+for (size_t i = 0; i < items.size(); ++i)
+cout << i + 1 << ". " << items[i].first
+<< " : " << items[i].second << '\n';
+}
+int readChoice() {
+int choice;
+if (!(cin >> choice)) {
+cin.clear();
+cin.ignore(numeric_limits<streamsize>::max(), '\n');
+return -1;
+}
+cin.ignore(numeric_limits<streamsize>::max(), '\n');
+return choice;
+}
+int main() {
+Trie dictionary;
+const string filename = "tu_vung.txt";
+int loaded = dictionary.loadFromFile(filename);
+cout << "=== TU DIEN ANH - VIET VA GOI Y TU ===\n";
+cout << "So ban ghi doc duoc: " << loaded << "\n";
+bool running = true;
+while (running) {
+cout << "\n---------- MENU ----------\n";
+cout << "1. Tra cuu tu\n";
+cout << "2. Them / cap nhat tu\n";
+cout << "3. Xoa tu\n";
+cout << "4. Goi y tu theo tien to\n";
+cout << "5. Liet ke toan bo tu dien\n";
+cout << "6. Luu du lieu\n";
+cout << "0. Luu va thoat\n";
+cout << "Lua chon: ";
+int choice = readChoice();
+string word, meaning;
+switch (choice) {
+case 1: {
+cout << "Nhap tu can tra: ";
+getline(cin, word);
+if (!normalizeWord(word)) {
+cout << "Tu khong hop le. Chi dung chu cai A-Z.\n";
+break;
+}
+if (dictionary.search(word, meaning))
+cout << word << " nghia la: " << meaning << '\n';
+else
+cout << "Khong tim thay tu \"" << word << "\".\n";
+break;
+}
+case 2: {
+cout << "Nhap tu tieng Anh: ";
+getline(cin, word);
+if (!normalizeWord(word)) {
+cout << "Tu khong hop le. Chi dung chu cai A-Z.\n";
+break;
+}
+cout << "Nhap nghia tieng Viet: ";
+getline(cin, meaning);
+if (meaning.empty()) {
+cout << "Nghia khong duoc de trong.\n";
+break;
+}
+bool isNew = dictionary.insert(word, meaning);
+cout << (isNew ? "Da them tu moi.\n"
+: "Tu da ton tai; da cap nhat nghia.\n");
+break;
+}
+case 3: {
+cout << "Nhap tu can xoa: ";
+getline(cin, word);
+if (!normalizeWord(word)) {
+cout << "Tu khong hop le. Chi dung chu cai A-Z.\n";
+break;
+}
+if (dictionary.erase(word))
+cout << "Da xoa tu " << word << ".\n";
+else
+cout << "Tu khong ton tai.\n";
+break;
+}
+case 4: {
+cout << "Nhap tien to: ";
+getline(cin, word);
+if (!word.empty() && !normalizeWord(word)) {
+cout << "Tien to khong hop le.\n";
+break;
+}
+if (word.empty()) {
+cout << "Tien to rong: hien thi 10 tu dau tien.\n";
+}
+showEntries(dictionary.suggest(word, 10));
+break;
+}
+case 5:
+showEntries(dictionary.listAll());
+break;
+case 6:
+if (dictionary.saveToFile(filename))
+cout << "Da luu vao " << filename << ".\n";
+else
+cout << "Khong the ghi tep du lieu.\n";
+break;
+case 0:
+if (dictionary.saveToFile(filename))
+cout << "Da luu du lieu. Tam biet!\n";
+else
+cout << "Canh bao: khong luu duoc tep du lieu.\n";
+running = false;
+break;
+default:
+cout << "Lua chon khong hop le. Hay nhap lai.\n";
+}
+}
+return 0;
+}
