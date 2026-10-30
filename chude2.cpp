@@ -29,3 +29,37 @@ if (ch < 'a' || ch > 'z') return false;
 }
 return true;
 }
+class Trie {
+private:
+TrieNode root;
+const TrieNode* findNode(const string &word) const {
+const TrieNode *cur = &root;
+for (char ch : word) {
+int idx = ch - 'a';
+if (idx < 0 || idx >= 26 || !cur->child[idx])
+return nullptr;
+cur = cur->child[idx].get();
+}
+return cur;
+}
+bool hasChildren(const TrieNode &node) const {
+for (const auto &p : node.child)
+if (p) return true;
+return false;
+}
+25
+bool eraseRec(TrieNode *node, const string &word, size_t pos, bool &deleted) {
+if (pos == word.size()) {
+if (!node->isEnd) return false;
+node->isEnd = false;
+node->meaning.clear();
+deleted = true;
+return !hasChildren(*node);
+}
+int idx = word[pos] - 'a';
+if (idx < 0 || idx >= 26 || !node->child[idx])
+return false;
+bool removeChild = eraseRec(node->child[idx].get(), word, pos + 1, deleted);
+if (removeChild) node->child[idx].reset();
+return !node->isEnd && !hasChildren(*node);
+}
