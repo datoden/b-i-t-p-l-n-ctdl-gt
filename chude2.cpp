@@ -72,7 +72,6 @@ current.push_back(static_cast<char>('a' + i));
 collectRec(node->child[i].get(), current, out, limit);
 current.pop_back();
 }
-26
 }
 }
 void listRec(const TrieNode *node, string &current, vector<pair<string, string>> &out) const {
