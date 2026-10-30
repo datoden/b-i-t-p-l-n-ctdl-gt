@@ -47,7 +47,6 @@ for (const auto &p : node.child)
 if (p) return true;
 return false;
 }
-25
 bool eraseRec(TrieNode *node, const string &word, size_t pos, bool &deleted) {
 if (pos == word.size()) {
 if (!node->isEnd) return false;
