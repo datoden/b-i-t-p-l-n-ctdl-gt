@@ -132,7 +132,6 @@ return result;
 vector<pair<string, string>> listAll() const {
 vector<pair<string, string>> result;
 string current;
-28
 listRec(&root, current, result);
 return result;
 }
