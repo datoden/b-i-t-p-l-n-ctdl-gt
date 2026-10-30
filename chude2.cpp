@@ -62,3 +62,38 @@ bool removeChild = eraseRec(node->child[idx].get(), word, pos + 1, deleted);
 if (removeChild) node->child[idx].reset();
 return !node->isEnd && !hasChildren(*node);
 }
+void collectRec(const TrieNode *node, string &current, vector<pair<string, string>> &out, size_t limit) const {
+if (!node || out.size() >= limit) return;
+if (node->isEnd)
+out.push_back({current, node->meaning});
+for (int i = 0; i < 26 && out.size() < limit; ++i) {
+if (node->child[i]) {
+current.push_back(static_cast<char>('a' + i));
+collectRec(node->child[i].get(), current, out, limit);
+current.pop_back();
+}
+26
+}
+}
+void listRec(const TrieNode *node, string &current, vector<pair<string, string>> &out) const {
+if (node->isEnd)
+out.push_back({current, node->meaning});
+for (int i = 0; i < 26; ++i) {
+if (node->child[i]) {
+current.push_back(static_cast<char>('a' + i));
+listRec(node->child[i].get(), current, out);
+current.pop_back();
+}
+}
+}
+void saveRec(const TrieNode *node, string &current, ostream &out) const {
+if (node->isEnd)
+out << current << '|' << node->meaning << '\n';
+for (int i = 0; i < 26; ++i) {
+if (node->child[i]) {
+current.push_back(static_cast<char>('a' + i));
+saveRec(node->child[i].get(), current, out);
+current.pop_back();
+}
+}
+}
